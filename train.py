@@ -123,7 +123,7 @@ def train(args, dataset, generator, discriminator):
         b_size = real_image.size(0)
         real_image = real_image.cuda()
 
-        if args.loss == 'wgan-gp':
+        if args.loss == 'wgan-gp':  # gradient penalty
             real_predict = discriminator(real_image, step=step, alpha=alpha)
             real_predict = real_predict.mean() - 0.001 * (real_predict ** 2).mean()
             (-real_predict).backward()
@@ -251,7 +251,7 @@ def train(args, dataset, generator, discriminator):
 
 
 if __name__ == '__main__':
-    code_size = 512
+    code_size = 512  # 生成器输入latent的维度
     batch_size = 16
     n_critic = 1
 

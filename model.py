@@ -168,7 +168,7 @@ class Blur(nn.Module):
 
         weight = torch.tensor([[1, 2, 1], [2, 4, 2], [1, 2, 1]], dtype=torch.float32)
         weight = weight.view(1, 1, 3, 3)
-        weight = weight / weight.sum()
+        weight = weight / weight.sum()  # 高斯滤波
         weight_flip = torch.flip(weight, [2, 3])
 
         self.register_buffer('weight', weight.repeat(channel, 1, 1, 1))
@@ -346,7 +346,7 @@ class StyledConvBlock(nn.Module):
             else:
                 self.conv1 = EqualConv2d(
                     in_channel, out_channel, kernel_size, padding=padding
-                )
+                )  # 在训练过程中, 按kaiming初始化动态调整权重, 即先调整再做卷积
 
         self.noise1 = equal_lr(NoiseInjection(out_channel))
         self.adain1 = AdaptiveInstanceNorm(out_channel, style_dim)
@@ -408,7 +408,7 @@ class Generator(nn.Module):
     def forward(self, style, noise, step=0, alpha=-1, mixing_range=(-1, -1)):
         out = noise[0]
 
-        if len(style) < 2:
+        if len(style) < 2:  # mix模式, 即使用2个latent
             inject_index = [len(self.progression) + 1]
 
         else:
@@ -487,7 +487,7 @@ class StyledGenerator(nn.Module):
                 size = 4 * 2 ** i
                 noise.append(torch.randn(batch, 1, size, size, device=input[0].device))
 
-        if mean_style is not None:
+        if mean_style is not None:  # 截断模式
             styles_norm = []
 
             for style in styles:
